@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>层次分析法在线计算工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        h2 {
+            color: #764ba2;
+            margin: 25px 0 15px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .setup-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .input-group input[type="text"],
+        .input-group input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .names-input {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .name-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .name-item input {
+            width: 150px;
+        }
+        
+        .matrix-section {
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 10px 0;
+            background: white;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+        }
+        
+        td input {
+            width: 80px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            text-align: center;
+        }
+        
+        .result-cell {
+            background: #f0f7ff;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        
+        button {
+            padding: 15px 40px;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .results-section {
+            margin-top: 30px;
+        }
+        
+        .result-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .consistency-pass {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        
+        .consistency-fail {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        
+        .final-ranking {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .rank-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .rank-item:first-child {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #333;
+        }
+        
+        .rank-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            width: 50px;
+        }
+        
+        .rank-name {
+            flex: 1;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .rank-score {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .matrix-container {
+            margin-bottom: 30px;
+        }
+        
+        .matrix-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>层次分析法在线计算工具</h1>
+        
+        <!-- 设置部分 -->
+        <div class="setup-section">
+            <h2>📋 基本设置</h2>
+            
+            <div class="input-group">
+                <label>准则数量：</label>
+                <input type="number" id="criteriaCount" value="4" min="2" max="10">
+            </div>
+            
+            <div class="input-group">
+                <label>方案数量：</label>
+                <input type="number" id="alternativesCount" value="3" min="2" max="10">
+            </div>
+            
+            <button class="btn-primary" onclick="initializeMatrices()">初始化</button>
+        </div>
+        
+        <!-- 名称输入部分 -->
+        <div class="setup-section hidden" id="namesSection">
+            <h2>📝 自定义名称</h2>
+            
+            <div class="input-group">
+                <label>准则名称：</label>
+                <div class="names-input" id="criteriaNames"></div>
+            </div>
+            
+            <div class="input-group">
+                <label>方案名称：</label>
+                <div class="names-input" id="alternativesNames"></div>
+            </div>
+        </div>
+        
+        <!-- 判断矩阵输入部分 -->
+        <div class="matrix-section hidden" id="matrixSection">
+            <h2>📊 填写判断矩阵</h2>
+            <div id="criteriaMatrix"></div>
+            <div id="alternativesMatrices"></div>
+        </div>
+        
+        <!-- 按钮部分 -->
+        <div class="button-group hidden" id="buttonSection">
+            <button class="btn-primary" onclick="runAHP()">运行计算</button>
+            <button class="btn-secondary" onclick="resetAll()">重置</button>
+        </div>
+        
+        <!-- 结果部分 -->
+        <div class="results-section hidden" id="resultsSection">
+            <h2>📈 计算结果</h2>
+            <div id="resultsContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // 全局数据 - 预填旅游案例数据
+        let data = {
+            criteriaCount: 4,
+            alternativesCount: 3,
+            criteriaNames: ['景色', '吃住', '价格', '人文'],
+            alternativesNames: ['南京', '桂林', '三亚'],
+            criteriaMatrix: [
+                [1, 0.25, 2, 0.33],
+                [4, 1, 8, 2],
+                [0.5, 0.13, 1, 0.2],
+                [3, 0.5, 5, 1]
+            ],
+            alternativesMatrices: [
+                [[1, 0.25, 2], [4, 1, 8], [0.5, 0.125, 1]],
+                [[1, 5, 2], [0.2, 1, 0.5], [0.5, 2, 1]],
+                [[1, 0.33, 2], [3, 1, 5], [0.5, 0.2, 1]],
+                [[1, 5, 7], [0.2, 1, 2], [0.14, 0.5, 1]]
+            ]
+        };
+
+        // RI值表
+        const RI = {
+            1: 0,
+            2: 0,
+            3: 0.58,
+            4: 0.90,
+            5: 1.12,
+            6: 1.24,
+            7: 1.32,
+            8: 1.41,
+            9: 1.45,
+            10: 1.49
+        };
+
+        // 初始化矩阵
+        function initializeMatrices() {
+            data.criteriaCount = parseInt(document.getElementById('criteriaCount').value);
+            data.alternativesCount = parseInt(document.getElementById('alternativesCount').value);
+            
+            // 生成默认名称
+            data.criteriaNames = [];
+            for (let i = 0; i < data.criteriaCount; i++) {
+                data.criteriaNames.push(`准则${i + 1}`);
+            }
+            
+            data.alternativesNames = [];
+            for (let i = 0; i < data.alternativesCount; i++) {
+                data.alternativesNames.push(`方案${i + 1}`);
+            }
+            
+            // 初始化矩阵为单位矩阵
+            data.criteriaMatrix = [];
+            for (let i = 0; i < data.criteriaCount; i++) {
+                data.criteriaMatrix[i] = [];
+                for (let j = 0; j < data.criteriaCount; j++) {
+                    data.criteriaMatrix[i][j] = i === j ? 1 : 1;
+                }
+            }
+            
+            data.alternativesMatrices = [];
+            for (let c = 0; c < data.criteriaCount; c++) {
+                data.alternativesMatrices[c] = [];
+                for (let i = 0; i < data.alternativesCount; i++) {
+                    data.alternativesMatrices[c][i] = [];
+                    for (let j = 0; j < data.alternativesCount; j++) {
+                        data.alternativesMatrices[c][i][j] = i === j ? 1 : 1;
+                    }
+                }
+            }
+            
+            renderNamesInput();
+            document.getElementById('namesSection').classList.remove('hidden');
+        }
+
+        // 渲染名称输入
+        function renderNamesInput() {
+            let html = '';
+            for (let i = 0; i < data.criteriaCount; i++) {
+                html += `<div class="name-item">
+                    <input type="text" value="${data.criteriaNames[i]}" 
+                           onchange="updateCriteriaName(${i}, this.value)">
+                </div>`;
+            }
+            document.getElementById('criteriaNames').innerHTML = html;
+            
+            html = '';
+            for (let i = 0; i < data.alternativesCount; i++) {
+                html += `<div class="name-item">
+                    <input type="text" value="${data.alternativesNames[i]}" 
+                           onchange="updateAlternativeName(${i}, this.value)">
+                </div>`;
+            }
+            document.getElementById('alternativesNames').innerHTML = html;
+            
+            renderMatrices();
+            document.getElementById('matrixSection').classList.remove('hidden');
+            document.getElementById('buttonSection').classList.remove('hidden');
+        }
+
+        function updateCriteriaName(index, value) {
+            data.criteriaNames[index] = value;
+            renderMatrices();
+        }
+
+        function updateAlternativeName(index, value) {
+            data.alternativesNames[index] = value;
+            renderMatrices();
+        }
+
+        // 渲染矩阵
+        function renderMatrices() {
+            // 准则矩阵
+            let html = '<div class="matrix-container"><div class="matrix-title">目标层 - 准则层判断矩阵</div>';
+            html += '<table><thead><tr><th>Z</th>';
+            for (let j = 0; j < data.criteriaCount; j++) {
+                html += `<th>${data.criteriaNames[j]}</th>`;
+            }
+            html += '</tr></thead><tbody>';
+            
+            for (let i = 0; i < data.criteriaCount; i++) {
+                html += `<tr><th>${data.criteriaNames[i]}</th>`;
+                for (let j = 0; j < data.criteriaCount; j++) {
+                    html += `<td><input type="number" step="0.01" 
+                               value="${data.criteriaMatrix[i][j]}" 
+                               onchange="updateCriteriaMatrix(${i}, ${j}, this.value)"></td>`;
+                }
+                html += '</tr>';
+            }
+            html += '</tbody></table></div>';
+            document.getElementById('criteriaMatrix').innerHTML = html;
+            
+            // 方案矩阵
+            html = '';
+            for (let c = 0; c < data.criteriaCount; c++) {
+                html += `<div class="matrix-container"><div class="matrix-title">准则层 - ${data.criteriaNames[c]} - 方案层判断矩阵</div>`;
+                html += '<table><thead><tr><th>' + data.criteriaNames[c] + '</th>';
+                for (let j = 0; j < data.alternativesCount; j++) {
+                    html += `<th>${data.alternativesNames[j]}</th>`;
+                }
+                html += '</tr></thead><tbody>';
+                
+                for (let i = 0; i < data.alternativesCount; i++) {
+                    html += `<tr><th>${data.alternativesNames[i]}</th>`;
+                    for (let j = 0; j < data.alternativesCount; j++) {
+                        html += `<td><input type="number" step="0.01" 
+                                   value="${data.alternativesMatrices[c][i][j]}" 
+                                   onchange="updateAlternativesMatrix(${c}, ${i}, ${j}, this.value)"></td>`;
+                    }
+                    html += '</tr>';
+                }
+                html += '</tbody></table></div>';
+            }
+            document.getElementById('alternativesMatrices').innerHTML = html;
+        }
+
+        function updateCriteriaMatrix(i, j, value) {
+            data.criteriaMatrix[i][j] = parseFloat(value);
+            if (i !== j) {
+                data.criteriaMatrix[j][i] = 1 / parseFloat(value);
+                renderMatrices();
+            }
+        }
+
+        function updateAlternativesMatrix(c, i, j, value) {
+            data.alternativesMatrices[c][i][j] = parseFloat(value);
+            if (i !== j) {
+                data.alternativesMatrices[c][j][i] = 1 / parseFloat(value);
+                renderMatrices();
+            }
+        }
+
+        // 计算权重（方根法）
+        function calculateWeights(matrix) {
+            const n = matrix.length;
+            const product = new Array(n).fill(1);
+            
+            // 计算每行乘积
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    product[i] *= matrix[i][j];
+                }
+            }
+            
+            // 开n次方
+            const root = product.map(p => Math.pow(p, 1/n));
+            
+            // 归一化
+            const sum = root.reduce((a, b) => a + b, 0);
+            const weights = root.map(r => r / sum);
+            
+            return weights;
+        }
+
+        // 计算一致性指标
+        function calculateConsistency(matrix, weights) {
+            const n = matrix.length;
+            const aw = new Array(n).fill(0);
+            
+            // 计算Aw
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    aw[i] += matrix[i][j] * weights[j];
+                }
+            }
+            
+            // 计算最大特征值
+            let lambdaMax = 0;
+            for (let i = 0; i < n; i++) {
+                lambdaMax += aw[i] / (n * weights[i]);
+            }
+            
+            // 计算CI和CR
+            const CI = (lambdaMax - n) / (n - 1);
+            const CR = CI / RI[n];
+            
+            return {
+                lambdaMax: lambdaMax,
+                CI: CI,
+                CR: CR,
+                passed: CR < 0.1,
+                aw: aw
+            };
+        }
+
+        // 运行层次分析法
+        function runAHP() {
+            // 计算准则层权重和一致性
+            const criteriaWeights = calculateWeights(data.criteriaMatrix);
+            const criteriaConsistency = calculateConsistency(data.criteriaMatrix, criteriaWeights);
+            
+            // 计算各准则下的方案权重
+            const alternativesWeights = [];
+            const alternativesConsistencies = [];
+            for (let c = 0; c < data.criteriaCount; c++) {
+                const weights = calculateWeights(data.alternativesMatrices[c]);
+                const consistency = calculateConsistency(data.alternativesMatrices[c], weights);
+                alternativesWeights.push(weights);
+                alternativesConsistencies.push(consistency);
+            }
+            
+            // 计算最终得分
+            const finalScores = new Array(data.alternativesCount).fill(0);
+            for (let i = 0; i < data.alternativesCount; i++) {
+                for (let c = 0; c < data.criteriaCount; c++) {
+                    finalScores[i] += alternativesWeights[c][i] * criteriaWeights[c];
+                }
+            }
+            
+            // 计算总一致性
+            let totalCI = 0;
+            let totalRI = 0;
+            for (let c = 0; c < data.criteriaCount; c++) {
+                totalCI += alternativesConsistencies[c].CI * criteriaWeights[c];
+                totalRI += RI[data.alternativesCount] * criteriaWeights[c];
+            }
+            const totalCR = totalCI / totalRI;
+            
+            renderResults(criteriaWeights, criteriaConsistency, alternativesWeights, alternativesConsistencies, finalScores, totalCR);
+        }
+
+        // 渲染结果
+        function renderResults(criteriaWeights, criteriaConsistency, alternativesWeights, alternativesConsistencies, finalScores, totalCR) {
+            let html = '';
+            
+            // 准则层结果
+            html += '<div class="result-card">';
+            html += '<h3>目标层 - 准则层权重计算</h3>';
+            html += '<table><thead><tr><th>准则</th><th>权重</th></tr></thead><tbody>';
+            for (let i = 0; i < data.criteriaCount; i++) {
+                html += `<tr><td>${data.criteriaNames[i]}</td><td class="result-cell">${criteriaWeights[i].toFixed(4)}</td></tr>`;
+            }
+            html += '</tbody></table>';
+            html += `<p><strong>λmax:</strong> ${criteriaConsistency.lambdaMax.toFixed(4)}</p>`;
+            html += `<p><strong>CI:</strong> ${criteriaConsistency.CI.toFixed(4)}</p>`;
+            html += `<p><strong>CR:</strong> ${criteriaConsistency.CR.toFixed(4)}</p>`;
+            html += `<p class="${criteriaConsistency.passed ? 'consistency-pass' : 'consistency-fail'}">`;
+            html += `<strong>${criteriaConsistency.passed ? '✓ 通过一致性检验' : '✗ 未通过一致性检验'}</strong></p>`;
+            html += '</div>';
+            
+            // 方案层结果
+            for (let c = 0; c < data.criteriaCount; c++) {
+                html += '<div class="result-card">';
+                html += `<h3>准则层 - ${data.criteriaNames[c]} - 方案层权重计算</h3>`;
+                html += '<table><thead><tr><th>方案</th><th>权重</th></tr></thead><tbody>';
+                for (let i = 0; i < data.alternativesCount; i++) {
+                    html += `<tr><td>${data.alternativesNames[i]}</td><td class="result-cell">${alternativesWeights[c][i].toFixed(4)}</td></tr>`;
+                }
+                html += '</tbody></table>';
+                html += `<p><strong>λmax:</strong> ${alternativesConsistencies[c].lambdaMax.toFixed(4)}</p>`;
+                html += `<p><strong>CI:</strong> ${alternativesConsistencies[c].CI.toFixed(4)}</p>`;
+                html += `<p><strong>CR:</strong> ${alternativesConsistencies[c].CR.toFixed(4)}</p>`;
+                html += `<p class="${alternativesConsistencies[c].passed ? 'consistency-pass' : 'consistency-fail'}">`;
+                html += `<strong>${alternativesConsistencies[c].passed ? '✓ 通过一致性检验' : '✗ 未通过一致性检验'}</strong></p>`;
+                html += '</div>';
+            }
+            
+            // 总一致性
+            html += '<div class="result-card">';
+            html += '<h3>层次总排序一致性检验</h3>';
+            html += `<p><strong>总CI:</strong> ${totalCI.toFixed(6)}</p>`;
+            html += `<p><strong>总RI:</strong> ${totalRI.toFixed(6)}</p>`;
+            html += `<p><strong>总CR:</strong> ${totalCR.toFixed(6)} ${totalCR < 0.1 ? '< 0.1' : '≥ 0.1'}</p>`;
+            html += `<p class="${totalCR < 0.1 ? 'consistency-pass' : 'consistency-fail'}">`;
+            html += `<strong>${totalCR < 0.1 ? '✓ 通过总一致性检验' : '✗ 未通过总一致性检验'}</strong></p>`;
+            html += '</div>';
+            
+            // 最终排名
+            const rankings = [];
+            for (let i = 0; i < data.alternativesCount; i++) {
+                rankings.push({
+                    name: data.alternativesNames[i],
+                    score: finalScores[i]
+                });
+            }
+            rankings.sort((a, b) => b.score - a.score);
+            
+            html += '<div class="result-card">';
+            html += '<h3>🏆 最终排名</h3>';
+            html += '<div class="final-ranking">';
+            for (let i = 0; i < rankings.length; i++) {
+                html += `<div class="rank-item">
+                    <div class="rank-number">${i + 1}</div>
+                    <div class="rank-name">${rankings[i].name}</div>
+                    <div class="rank-score">${rankings[i].score.toFixed(4)}</div>
+                </div>`;
+            }
+            html += '</div></div>';
+            
+            document.getElementById('resultsContent').innerHTML = html;
+            document.getElementById('resultsSection').classList.remove('hidden');
+        }
+
+        // 重置
+        function resetAll() {
+            document.getElementById('namesSection').classList.add('hidden');
+            document.getElementById('matrixSection').classList.add('hidden');
+            document.getElementById('buttonSection').classList.add('hidden');
+            document.getElementById('resultsSection').classList.add('hidden');
+            document.getElementById('criteriaCount').value = 4;
+            document.getElementById('alternativesCount').value = 3;
+        }
+
+        // 页面加载时初始化默认数据
+        window.onload = function() {
+            // 预填默认数据并直接显示
+            renderNamesInput();
+        };
+    </script>
+</body>
+</html>
